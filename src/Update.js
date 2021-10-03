@@ -9,6 +9,10 @@ const MSGS = {
   DUE_DATE_INPUT: "DUE_DATE_INPUT",
   STATUS_INPUT: "STATUS_INPUT",
   SAVE_INVOICE: "SAVE_INVOICE",
+  ADD_INVOICE_LINE: "ADD_INVOICE_LINE",
+  LINE_NAME_INPUT: "LINE_NAME_INPUT",
+  LINE_HOURS_INPUT: "LINE_HOURS_INPUT",
+  LINE_HOURLY_RATE_INPUT: "LINE_HOURLY_RATE_INPUT",
 };
 
 /**
@@ -88,7 +92,42 @@ export function statusMsg(status) {
   };
 }
 
+/**
+ * @param {String} lineName
+ * @returns {Object}
+ */
+export function lineNameMsg(lineName) {
+  return {
+    type: MSGS.LINE_NAME_INPUT,
+    lineName,
+  };
+}
+
+/**
+ * @param {Number} lineHours
+ * @returns {Object}
+ */
+export function lineHoursMsg(lineHours) {
+  return {
+    type: MSGS.LINE_HOURS_INPUT,
+    lineHours,
+  };
+}
+
+/**
+ * @param {Number} lineHourlyRate
+ * @returns {Object}
+ */
+export function lineHourlyRateMsg(lineHourlyRate) {
+  return {
+    type: MSGS.LINE_HOURLY_RATE_INPUT,
+    lineHourlyRate,
+  };
+}
+
 export const saveInvoiceMsg = { type: MSGS.SAVE_INVOICE };
+
+export const addInvoiceLine = { type: MSGS.ADD_INVOICE_LINE };
 
 /**
  * @param {Object} msg
@@ -99,8 +138,10 @@ function update(msg, model) {
   switch (msg.type) {
     case MSGS.SHOW_FORM: {
       const { showForm } = msg;
+      const { nextId } = model;
       return {
         ...model,
+        id: nextId,
         showForm,
         customerName: "",
         email: "",
@@ -109,6 +150,10 @@ function update(msg, model) {
         dueDate: "",
         created: new Date(),
         status: "Open",
+        lineName: "",
+        lineHours: 0,
+        lineHourlyRate: 0,
+        invoiceLines: [],
       };
     }
     case MSGS.CUSTOMER_NAME_INPUT: {
@@ -140,6 +185,36 @@ function update(msg, model) {
       const updateModel = editId !== null ? edit(model) : add(model);
       return updateModel;
     }
+    case MSGS.LINE_NAME_INPUT: {
+      const { lineName } = msg;
+      return { ...model, lineName };
+    }
+    case MSGS.LINE_HOURS_INPUT: {
+      const { lineHours } = msg;
+      return { ...model, lineHours };
+    }
+    case MSGS.LINE_HOURLY_RATE_INPUT: {
+      const { lineHourlyRate } = msg;
+      return { ...model, lineHourlyRate };
+    }
+    case MSGS.ADD_INVOICE_LINE: {
+      const { lineName, lineHours, lineHourlyRate } = model;
+
+      const line = {
+        lineName,
+        lineHours,
+        lineHourlyRate,
+      };
+      const invoiceLines = [...model.invoiceLines, line];
+
+      return {
+        ...model,
+        invoiceLines,
+        lineName: "",
+        lineHours: null,
+        lineHourlyRate: null,
+      };
+    }
   }
   return model;
 }
@@ -157,17 +232,26 @@ function edit(model) {
  * @returns {Object}
  */
 function add(model) {
-  debugger;
-  const { nextId, customerName, email, billTo, description, dueDate, status } =
-    model;
-  const invoice = {
-    id: nextId,
+  const {
+    id,
+    nextId,
     customerName,
     email,
     billTo,
     description,
     dueDate,
     status,
+    invoiceLines,
+  } = model;
+  const invoice = {
+    id,
+    customerName,
+    email,
+    billTo,
+    description,
+    dueDate,
+    status,
+    invoiceLines,
   };
   const invoices = [...model.invoices, invoice];
 
@@ -182,6 +266,10 @@ function add(model) {
     dueDate: "",
     status: "Open",
     showForm: false,
+    lineName: "",
+    lineHours: 0,
+    lineHourlyRate: 0,
+    invoiceLines: [],
   };
 }
 

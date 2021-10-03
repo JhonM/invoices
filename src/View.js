@@ -10,6 +10,10 @@ import {
   dueDateMsg,
   statusMsg,
   saveInvoiceMsg,
+  addInvoiceLine,
+  lineNameMsg,
+  lineHoursMsg,
+  lineHourlyRateMsg,
 } from "./Update";
 
 const { button, div, form, h1, input, label, option, pre, textarea, select } =
@@ -64,6 +68,31 @@ function fieldset(labelText, value, oninput) {
       value,
       oninput,
     }),
+  ]);
+}
+
+/**
+ * @param {Function} dispatch
+ * @param {Object} model
+ * @returns {Object} - VirtualNode object
+ */
+function lineViewForm(dispatch, model) {
+  const { lineName, lineHours, lineHourlyRate } = model;
+
+  return div({ className: "flex justify-between" }, [
+    fieldset("Name", lineName, (e) => dispatch(lineNameMsg(e.target.value))),
+    fieldset("Hours", lineHours, (e) => dispatch(lineHoursMsg(e.target.value))),
+    fieldset("Hourly rate", lineHourlyRate, (e) =>
+      dispatch(lineHourlyRateMsg(e.target.value))
+    ),
+    button(
+      {
+        className: "f3 pv2 ph3 bg-blue white bn",
+        onclick: () => dispatch(addInvoiceLine),
+        type: "button",
+      },
+      "Add line"
+    ),
   ]);
 }
 
@@ -131,6 +160,7 @@ function formView(dispatch, model) {
               statusUnitOptions(status)
             ),
           ]),
+          div([lineViewForm(dispatch, model)]),
           buttonSet(dispatch),
           pre(JSON.stringify(model, null, 2)),
         ]

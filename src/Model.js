@@ -11,6 +11,10 @@ const initModel = {
   nextId: 0,
   editId: null,
   invoices: [],
+  lineName: "",
+  lineHours: 0,
+  lineHourlyRate: 0,
+  invoiceLines: [],
 };
 
 export default initModel;
