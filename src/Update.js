@@ -1,4 +1,6 @@
 import * as R from "ramda";
+import { DateTime } from "luxon";
+import { total } from "./helpers";
 
 const MSGS = {
   SHOW_FORM: "SHOW_FORM",
@@ -135,6 +137,8 @@ export const addInvoiceLine = { type: MSGS.ADD_INVOICE_LINE };
  * @returns {Object}
  */
 function update(msg, model) {
+  const dt = DateTime.now();
+
   switch (msg.type) {
     case MSGS.SHOW_FORM: {
       const { showForm } = msg;
@@ -148,7 +152,7 @@ function update(msg, model) {
         billTo: "",
         description: "",
         dueDate: "",
-        created: new Date(),
+        created: dt.toLocaleString(),
         status: "Open",
         lineName: "",
         lineHours: 0,
@@ -190,11 +194,14 @@ function update(msg, model) {
       return { ...model, lineName };
     }
     case MSGS.LINE_HOURS_INPUT: {
-      const { lineHours } = msg;
+      const lineHours = R.pipe(parseInt, R.defaultTo(0))(msg.lineHours);
       return { ...model, lineHours };
     }
     case MSGS.LINE_HOURLY_RATE_INPUT: {
-      const { lineHourlyRate } = msg;
+      const lineHourlyRate = R.pipe(
+        parseInt,
+        R.defaultTo(0)
+      )(msg.lineHourlyRate);
       return { ...model, lineHourlyRate };
     }
     case MSGS.ADD_INVOICE_LINE: {
@@ -204,6 +211,7 @@ function update(msg, model) {
         lineName,
         lineHours,
         lineHourlyRate,
+        lineAmount: lineHours * lineHourlyRate,
       };
       const invoiceLines = [...model.invoiceLines, line];
 
@@ -211,8 +219,6 @@ function update(msg, model) {
         ...model,
         invoiceLines,
         lineName: "",
-        lineHours: null,
-        lineHourlyRate: null,
       };
     }
   }
@@ -242,6 +248,7 @@ function add(model) {
     dueDate,
     status,
     invoiceLines,
+    created,
   } = model;
   const invoice = {
     id,
@@ -252,6 +259,9 @@ function add(model) {
     dueDate,
     status,
     invoiceLines,
+    created,
+    linesAmountTotal: total(invoiceLines, (invoice) => invoice.lineAmount),
+    linesHoursTotal: total(invoiceLines, (invoice) => invoice.lineHours),
   };
   const invoices = [...model.invoices, invoice];
 

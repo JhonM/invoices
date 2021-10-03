@@ -15,6 +15,7 @@ const initModel = {
   lineHours: 0,
   lineHourlyRate: 0,
   invoiceLines: [],
+  linesAmountTotal: 0,
 };
 
 export default initModel;

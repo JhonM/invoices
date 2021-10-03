@@ -10,6 +10,7 @@
   "dependencies": {
     "hyperscript": "2.0.2",
     "hyperscript-helpers": "3.0.3",
+    "luxon": "^2.0.2",
     "parcel-bundler": "^1.6.1",
     "ramda": "^0.27.1",
     "virtual-dom": "2.1.1"

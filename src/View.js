@@ -15,11 +15,187 @@ import {
   lineHoursMsg,
   lineHourlyRateMsg,
 } from "./Update";
+import { total } from "./helpers";
 
-const { button, div, form, h1, input, label, option, pre, textarea, select } =
-  hh(h);
+const {
+  button,
+  div,
+  form,
+  h1,
+  input,
+  label,
+  option,
+  pre,
+  table,
+  tbody,
+  textarea,
+  thead,
+  tr,
+  th,
+  td,
+  select,
+} = hh(h);
 
 const STATUS_UNITS = ["Open", "Close", "Due", "Paid"];
+
+/**
+ * @param {Object} tag - VirtualNode
+ * @param {String} className
+ * @param {String} value
+ * @returns {Object} - VirtualNode object
+ */
+function cell(tag, className, value) {
+  return tag({ className }, value);
+}
+
+const invoiceTableHeader = thead([
+  tr([
+    cell(th, "pa2 tl", "Customer"),
+    cell(th, "pa2 tl", "#"),
+    cell(th, "pa2 tl", "Amount"),
+    cell(th, "pa2 tl", "Period"),
+    cell(th, "pa2 tl", "Hours"),
+    cell(th, "pa2 tl", "Due"),
+    cell(th, "pa2 tl", "Created"),
+    cell(th, "pa2 tl", "Status"),
+  ]),
+]);
+
+/**
+ * @param {Function} dispatch - VirtualNode
+ * @param {String} className
+ * @param {Object} invoice
+ * @returns {Object} - VirtualNode object
+ */
+function invoiceRow(dispatch, className, invoice) {
+  return tr({ className }, [
+    cell(td, "pa2", invoice.customerName),
+    cell(td, "pa2 tl", invoice.id),
+    cell(td, "pa2 tl", invoice.linesAmountTotal),
+    cell(td, "pa2 tl", "Period"),
+    cell(td, "pa2 tl", invoice.linesHoursTotal),
+    cell(td, "pa2 tl", invoice.dueDate),
+    cell(td, "pa2 tl", invoice.created),
+    cell(td, "pa2 tl", invoice.status),
+  ]);
+}
+
+/**
+ * @param {Array} invoices
+ * @returns {Object} - VirtualNode object
+ */
+function invoiceTotalRow(invoices) {
+  const linesAmountTotal = total(
+    invoices,
+    (invoice) => invoice.linesAmountTotal
+  );
+
+  return tr({ className: "bt b" }, [
+    cell(td, "", ""),
+    cell(td, "", ""),
+    cell(td, "pa2 tl", linesAmountTotal),
+  ]);
+}
+
+/**
+ * @param {Function} dispatch - VirtualNode
+ * @param {String} className
+ * @param {Array} invoices
+ * @returns {Object} - VirtualNode object
+ */
+function invoicesBody(dispatch, className, invoices) {
+  const rows = R.map(R.partial(invoiceRow, [dispatch, ""]), invoices);
+
+  const rowsWithTotal = [...rows, invoiceTotalRow(invoices)];
+
+  return tbody({ className }, rowsWithTotal);
+}
+
+/**
+ * @param {Function} dispatch - VirtualNode
+ * @param {Array} invoices
+ * @returns {Object} - VirtualNode object
+ */
+function invoiceTableView(dispatch, invoices) {
+  if (invoices.length === 0) {
+    return div({ className: "mv2 i black-50" }, "No invoices to display....");
+  }
+
+  return table({ className: "mv2 w-100 collapse" }, [
+    invoiceTableHeader,
+    invoicesBody(dispatch, "", invoices),
+  ]);
+}
+
+const invoiceLinesTableHeader = thead([
+  tr([
+    cell(th, "pa2 tl", "Name"),
+    cell(th, "pa2 tl", "Hours"),
+    cell(th, "pa2 tl", "Hourly rate"),
+    cell(th, "pa2 tl", "Amount"),
+  ]),
+]);
+
+/**
+ * @param {Function} dispatch - VirtualNode
+ * @param {String} className
+ * @param {Object} line
+ * @returns {Object} - VirtualNode object
+ */
+function invoiceLinesRow(dispatch, className, line) {
+  return tr({ className }, [
+    cell(td, "pa2", line.lineName),
+    cell(td, "pa2 tl", line.lineHours),
+    cell(td, "pa2 tl", line.lineHourlyRate),
+    cell(td, "pa2 tl", line.lineAmount),
+  ]);
+}
+
+/**
+ * @param {Array} lines
+ * @returns {Object} - VirtualNode object
+ */
+function invoiceLinesTotalRow(lines) {
+  const linesAmountTotal = total(lines, (line) => line.lineAmount);
+  const linesHoursTotal = total(lines, (line) => line.lineHours);
+
+  return tr({ className: "bt b" }, [
+    cell(td, "pa2 tl", "Total"),
+    cell(td, "pa2 tl", linesHoursTotal),
+    cell(td, "", ""),
+    cell(td, "pa2 tl", linesAmountTotal),
+  ]);
+}
+
+/**
+ * @param {Function} dispatch - VirtualNode
+ * @param {String} className
+ * @param {Array} lines
+ * @returns {Object} - VirtualNode object
+ */
+function invoiceLinesBody(dispatch, className, lines) {
+  const rows = R.map(R.partial(invoiceLinesRow, [dispatch, ""]), lines);
+
+  const rowsWithTotal = [...rows, invoiceLinesTotalRow(lines)];
+
+  return tbody({ className }, rowsWithTotal);
+}
+
+/**
+ * @param {Function} dispatch - VirtualNode
+ * @param {Array} lines
+ * @returns {Object} - VirtualNode object
+ */
+function invoiceLinesTableView(dispatch, lines) {
+  if (lines.length === 0) {
+    return div({ className: "mv2 i black-50" }, "No invoices to display....");
+  }
+
+  return table({ className: "mv2 w-100 collapse" }, [
+    invoiceLinesTableHeader,
+    invoiceLinesBody(dispatch, "", lines),
+  ]);
+}
 
 /**
  * @param {String} selectedUnit
@@ -120,7 +296,6 @@ function formView(dispatch, model) {
           onsubmit: (e) => {
             e.preventDefault();
             dispatch(saveInvoiceMsg);
-            console.log("save form");
           },
         },
         [
@@ -160,6 +335,7 @@ function formView(dispatch, model) {
               statusUnitOptions(status)
             ),
           ]),
+          invoiceLinesTableView(dispatch, model.invoiceLines),
           div([lineViewForm(dispatch, model)]),
           buttonSet(dispatch),
           pre(JSON.stringify(model, null, 2)),
@@ -176,14 +352,17 @@ function formView(dispatch, model) {
  */
 function view(dispatch, model) {
   return div({ className: "relative mw8 center" }, [
-    h1({ className: "Some class name" }, "Invoices"),
-    button(
-      {
-        className: "f3 pv2 ph3 bg-blue white bn",
-        onclick: () => dispatch(showFormMsg(true)),
-      },
-      "Add invoice"
-    ),
+    div({ className: "flex justify-between" }, [
+      h1({ className: "Some class name" }, "Invoices"),
+      button(
+        {
+          className: "f3 pv2 ph3 bg-blue white bn",
+          onclick: () => dispatch(showFormMsg(true)),
+        },
+        "Add invoice"
+      ),
+    ]),
+    invoiceTableView(dispatch, model.invoices),
     formView(dispatch, model),
     pre(JSON.stringify(model, null, 2)),
   ]);
