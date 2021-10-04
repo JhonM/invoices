@@ -22,6 +22,7 @@ const {
   div,
   form,
   h1,
+  h2,
   input,
   label,
   option,
@@ -48,16 +49,48 @@ function cell(tag, className, value) {
   return tag({ className }, value);
 }
 
-const invoiceTableHeader = thead([
+const invoiceTableHeader = thead({ className: "block md:table-header-group" }, [
   tr([
-    cell(th, "pa2 tl", "Customer"),
-    cell(th, "pa2 tl", "#"),
-    cell(th, "pa2 tl", "Amount"),
-    cell(th, "pa2 tl", "Period"),
-    cell(th, "pa2 tl", "Hours"),
-    cell(th, "pa2 tl", "Due"),
-    cell(th, "pa2 tl", "Created"),
-    cell(th, "pa2 tl", "Status"),
+    cell(
+      th,
+      "p-2 md:border md:border-grey-500 text-left block md:table-cell",
+      "Customer"
+    ),
+    cell(
+      th,
+      "p-2 md:border md:border-grey-500 text-left block md:table-cell",
+      "#"
+    ),
+    cell(
+      th,
+      "p-2 md:border md:border-grey-500 text-left block md:table-cell",
+      "Amount"
+    ),
+    cell(
+      th,
+      "p-2 md:border md:border-grey-500 text-left block md:table-cell",
+      "Period"
+    ),
+    cell(
+      th,
+      "p-2 md:border md:border-grey-500 text-left block md:table-cell",
+      "Hours"
+    ),
+    cell(
+      th,
+      "p-2 md:border md:border-grey-500 text-left block md:table-cell",
+      "Due"
+    ),
+    cell(
+      th,
+      "p-2 md:border md:border-grey-500 text-left block md:table-cell",
+      "Created"
+    ),
+    cell(
+      th,
+      "p-2 md:border md:border-grey-500 text-left block md:table-cell",
+      "Status"
+    ),
   ]),
 ]);
 
@@ -69,14 +102,46 @@ const invoiceTableHeader = thead([
  */
 function invoiceRow(dispatch, className, invoice) {
   return tr({ className }, [
-    cell(td, "pa2", invoice.customerName),
-    cell(td, "pa2 tl", invoice.id),
-    cell(td, "pa2 tl", invoice.linesAmountTotal),
-    cell(td, "pa2 tl", "Period"),
-    cell(td, "pa2 tl", invoice.linesHoursTotal),
-    cell(td, "pa2 tl", invoice.dueDate),
-    cell(td, "pa2 tl", invoice.created),
-    cell(td, "pa2 tl", invoice.status),
+    cell(
+      td,
+      "p-2 md:border md:border-grey-500 text-left block md:table-cell",
+      invoice.customerName
+    ),
+    cell(
+      td,
+      "p-2 md:border md:border-grey-500 text-left block md:table-cell",
+      invoice.id
+    ),
+    cell(
+      td,
+      "p-2 md:border md:border-grey-500 text-left block md:table-cell",
+      invoice.linesAmountTotal
+    ),
+    cell(
+      td,
+      "p-2 md:border md:border-grey-500 text-left block md:table-cell",
+      "Period"
+    ),
+    cell(
+      td,
+      "p-2 md:border md:border-grey-500 text-left block md:table-cell",
+      invoice.linesHoursTotal
+    ),
+    cell(
+      td,
+      "p-2 md:border md:border-grey-500 text-left block md:table-cell",
+      invoice.dueDate
+    ),
+    cell(
+      td,
+      "p-2 md:border md:border-grey-500 text-left block md:table-cell",
+      invoice.created
+    ),
+    cell(
+      td,
+      "p-2 md:border md:border-grey-500 text-left block md:table-cell",
+      invoice.status
+    ),
   ]);
 }
 
@@ -91,9 +156,9 @@ function invoiceTotalRow(invoices) {
   );
 
   return tr({ className: "bt b" }, [
-    cell(td, "", ""),
-    cell(td, "", ""),
-    cell(td, "pa2 tl", linesAmountTotal),
+    cell(td, "p-2 text-left block md:table-cell", ""),
+    cell(td, "p-2 text-left block md:table-cell", ""),
+    cell(td, "p-2 text-left block md:table-cell", linesAmountTotal),
   ]);
 }
 
@@ -104,7 +169,13 @@ function invoiceTotalRow(invoices) {
  * @returns {Object} - VirtualNode object
  */
 function invoicesBody(dispatch, className, invoices) {
-  const rows = R.map(R.partial(invoiceRow, [dispatch, ""]), invoices);
+  const rows = R.map(
+    R.partial(invoiceRow, [
+      dispatch,
+      "bg-white border border-grey-500 md:border-none block md:table-row",
+    ]),
+    invoices
+  );
 
   const rowsWithTotal = [...rows, invoiceTotalRow(invoices)];
 
@@ -118,23 +189,48 @@ function invoicesBody(dispatch, className, invoices) {
  */
 function invoiceTableView(dispatch, invoices) {
   if (invoices.length === 0) {
-    return div({ className: "mv2 i black-50" }, "No invoices to display....");
+    return div({ className: "mb-4" }, "No invoices to display....");
   }
 
-  return table({ className: "mv2 w-100 collapse" }, [
+  return table({ className: "min-w-full border-collapse block md:table" }, [
     invoiceTableHeader,
-    invoicesBody(dispatch, "", invoices),
+    invoicesBody(dispatch, "block md:table-row-group", invoices),
   ]);
 }
 
-const invoiceLinesTableHeader = thead([
-  tr([
-    cell(th, "pa2 tl", "Name"),
-    cell(th, "pa2 tl", "Hours"),
-    cell(th, "pa2 tl", "Hourly rate"),
-    cell(th, "pa2 tl", "Amount"),
-  ]),
-]);
+const invoiceLinesTableHeader = thead(
+  { className: "block md:table-header-group" },
+  [
+    tr(
+      {
+        className:
+          "bg-gray-300 border border-grey-500 md:border-none block md:table-row",
+      },
+      [
+        cell(
+          th,
+          "p-2 md:border md:border-grey-500 text-left block md:table-cell",
+          "Name"
+        ),
+        cell(
+          th,
+          "p-2 md:border md:border-grey-500 text-left block md:table-cell",
+          "Hours"
+        ),
+        cell(
+          th,
+          "p-2 md:border md:border-grey-500 text-left block md:table-cell",
+          "Hourly rate"
+        ),
+        cell(
+          th,
+          "p-2 md:border md:border-grey-500 text-left block md:table-cell",
+          "Amount"
+        ),
+      ]
+    ),
+  ]
+);
 
 /**
  * @param {Function} dispatch - VirtualNode
@@ -144,10 +240,26 @@ const invoiceLinesTableHeader = thead([
  */
 function invoiceLinesRow(dispatch, className, line) {
   return tr({ className }, [
-    cell(td, "pa2", line.lineName),
-    cell(td, "pa2 tl", line.lineHours),
-    cell(td, "pa2 tl", line.lineHourlyRate),
-    cell(td, "pa2 tl", line.lineAmount),
+    cell(
+      td,
+      "p-2 md:border md:border-grey-500 text-left block md:table-cell",
+      line.lineName
+    ),
+    cell(
+      td,
+      "p-2 md:border md:border-grey-500 text-left block md:table-cell",
+      line.lineHours
+    ),
+    cell(
+      td,
+      "p-2 md:border md:border-grey-500 text-left block md:table-cell",
+      line.lineHourlyRate
+    ),
+    cell(
+      td,
+      "p-2 md:border md:border-grey-500 text-left block md:table-cell",
+      line.lineAmount
+    ),
   ]);
 }
 
@@ -159,12 +271,34 @@ function invoiceLinesTotalRow(lines) {
   const linesAmountTotal = total(lines, (line) => line.lineAmount);
   const linesHoursTotal = total(lines, (line) => line.lineHours);
 
-  return tr({ className: "bt b" }, [
-    cell(td, "pa2 tl", "Total"),
-    cell(td, "pa2 tl", linesHoursTotal),
-    cell(td, "", ""),
-    cell(td, "pa2 tl", linesAmountTotal),
-  ]);
+  return tr(
+    {
+      className:
+        "bg-gray-300 border border-grey-500 md:border-none block md:table-row",
+    },
+    [
+      cell(
+        td,
+        "p-2 md:border md:border-grey-500 text-left block md:table-cell",
+        "Total"
+      ),
+      cell(
+        td,
+        "p-2 md:border md:border-grey-500 text-left block md:table-cell",
+        linesHoursTotal
+      ),
+      cell(
+        td,
+        "p-2 md:border md:border-grey-500 text-left block md:table-cell",
+        ""
+      ),
+      cell(
+        td,
+        "p-2 md:border md:border-grey-500 text-left block md:table-cell",
+        linesAmountTotal
+      ),
+    ]
+  );
 }
 
 /**
@@ -174,7 +308,13 @@ function invoiceLinesTotalRow(lines) {
  * @returns {Object} - VirtualNode object
  */
 function invoiceLinesBody(dispatch, className, lines) {
-  const rows = R.map(R.partial(invoiceLinesRow, [dispatch, ""]), lines);
+  const rows = R.map(
+    R.partial(invoiceLinesRow, [
+      dispatch,
+      "bg-white border border-grey-500 md:border-none block md:table-row",
+    ]),
+    lines
+  );
 
   const rowsWithTotal = [...rows, invoiceLinesTotalRow(lines)];
 
@@ -188,13 +328,13 @@ function invoiceLinesBody(dispatch, className, lines) {
  */
 function invoiceLinesTableView(dispatch, lines) {
   if (lines.length === 0) {
-    return div({ className: "mv2 i black-50" }, "No invoices to display....");
+    return div({ className: "mb-5" });
   }
 
-  return table({ className: "mv2 w-100 collapse" }, [
-    invoiceLinesTableHeader,
-    invoiceLinesBody(dispatch, "", lines),
-  ]);
+  return table(
+    { className: "min-w-full border-collapse block md:table my-10" },
+    [invoiceLinesTableHeader, invoiceLinesBody(dispatch, "", lines)]
+  );
 }
 
 /**
@@ -213,18 +353,23 @@ function statusUnitOptions(selectedUnit) {
  * @returns {Object} - VirtualNode object
  */
 function buttonSet(dispatch) {
-  return div([
-    button(
-      { className: "f3 pv2 ph3 bg-blue white bn mr2 dim", type: "submit" },
-      "Save"
-    ),
+  return div({ className: "flex justify-end" }, [
     button(
       {
-        className: "f3 pv2 ph3 bg-light-grey bn dim",
+        className:
+          "px-4 py-2 rounded-md text-sm font-medium border-0 focus:outline-none focus:ring transition text-gray-600 bg-gray-50 hover:text-gray-800 hover:bg-gray-100 active:bg-gray-200 focus:ring-gray-300 mr-3",
         type: "button",
         onclick: () => dispatch(showFormMsg(false)),
       },
       "Cancel"
+    ),
+    button(
+      {
+        className:
+          "px-4 py-2 rounded-md text-sm font-medium border-0 focus:outline-none focus:ring transition text-white bg-blue-500 hover:bg-blue-600 active:bg-blue-700 focus:ring-blue-300",
+        type: "submit",
+      },
+      "Save"
     ),
   ]);
 }
@@ -236,10 +381,10 @@ function buttonSet(dispatch) {
  * @returns {Object} - VirtualNode object
  */
 function fieldset(labelText, value, oninput) {
-  return div([
-    label({ className: "db mb1" }, labelText),
+  return div({ className: "mb-5" }, [
+    label(labelText),
     input({
-      className: "pa2 input-reset ba w-100 mb2",
+      className: "h-10 border mt-1 rounded px-4 w-full bg-gray-50",
       type: "text",
       value,
       oninput,
@@ -255,7 +400,7 @@ function fieldset(labelText, value, oninput) {
 function lineViewForm(dispatch, model) {
   const { lineName, lineHours, lineHourlyRate } = model;
 
-  return div({ className: "flex justify-between" }, [
+  return div({ className: "flex justify-between items-center mb-5" }, [
     fieldset("Name", lineName, (e) => dispatch(lineNameMsg(e.target.value))),
     fieldset("Hours", lineHours, (e) => dispatch(lineHoursMsg(e.target.value))),
     fieldset("Hourly rate", lineHourlyRate, (e) =>
@@ -263,11 +408,12 @@ function lineViewForm(dispatch, model) {
     ),
     button(
       {
-        className: "f3 pv2 ph3 bg-blue white bn",
+        className:
+          "px-4 py-2 rounded-md text-sm font-medium focus:outline-none focus:ring transition text-blue-600 hover:bg-blue-50 active:bg-blue-100 focus:ring-blue-300 max-h-12",
         onclick: () => dispatch(addInvoiceLine),
         type: "button",
       },
-      "Add line"
+      "+ Add line"
     ),
   ]);
 }
@@ -289,17 +435,21 @@ function formView(dispatch, model) {
   } = model;
 
   if (showForm) {
-    return div({ className: "fixed w-100 h-100 absolute--fill bg-gray" }, [
+    return div({ className: "fixed w-full h-full inset-0 bg-gray-200" }, [
       form(
         {
-          className: "mw7 bg-white pv3 ph3 center",
+          className:
+            "relative bg-white rounded shadow-lg p-4 px-4 md:p-8 mb-6 container max-w-screen-lg mx-auto top-40",
           onsubmit: (e) => {
             e.preventDefault();
             dispatch(saveInvoiceMsg);
           },
         },
         [
-          h1("Add invoice"),
+          h2(
+            { className: "font-semibold text-xl text-gray-600 mb-5" },
+            "+ Add invoice"
+          ),
           fieldset("Customer name", customerName, (e) =>
             dispatch(customerNameMsg(e.target.value))
           ),
@@ -307,29 +457,29 @@ function formView(dispatch, model) {
           fieldset("Bill to", billTo, (e) =>
             dispatch(billToMsg(e.target.value))
           ),
-          div([
-            label({ className: "db mb1" }, "Description"),
+          div({ className: "mb-5" }, [
+            label("Description"),
             textarea({
-              className: "pa2 input-reset ba w-100",
+              className: "h-10 border mt-1 rounded px-4 w-full bg-gray-50",
               value: description,
               oninput: (e) => dispatch(descriptionMsg(e.target.value)),
             }),
           ]),
-          div([
-            label({ className: "db mb1" }, "Due date"),
+          div({ className: "mb-5" }, [
+            label("Due date"),
             input({
-              className: "pa2 input-reset ba w-100 mb2",
+              className: "h-10 border mt-1 rounded px-4 w-full bg-gray-50",
               type: "date",
               value: dueDate,
               oninput: (e) => dispatch(dueDateMsg(e.target.value)),
             }),
           ]),
-          div([
-            label({ className: "db mb1" }, "Status"),
+          div({ className: "mb-5" }, [
+            label("Status"),
             select(
               {
                 className:
-                  "db w-100 pa2 ba input-reset br1 bg-white ba b--black",
+                  "h-10 bg-gray-50 flex border border-gray-200 rounded items-center mt-1",
                 onchange: (e) => dispatch(statusMsg(e.target.value)),
               },
               statusUnitOptions(status)
@@ -338,7 +488,7 @@ function formView(dispatch, model) {
           invoiceLinesTableView(dispatch, model.invoiceLines),
           div([lineViewForm(dispatch, model)]),
           buttonSet(dispatch),
-          pre(JSON.stringify(model, null, 2)),
+          // pre(JSON.stringify(model, null, 2)),
         ]
       ),
     ]);
@@ -351,21 +501,36 @@ function formView(dispatch, model) {
  * @returns {Object} - VirtualNode object
  */
 function view(dispatch, model) {
-  return div({ className: "relative mw8 center" }, [
-    div({ className: "flex justify-between" }, [
-      h1({ className: "Some class name" }, "Invoices"),
-      button(
+  return div(
+    {
+      className: "relative p-6 container max-w-screen-lg mx-auto mt-24",
+    },
+    [
+      div({ className: "flex justify-between mb-8" }, [
+        h1(
+          { className: "text-gray-600 font-bold md:text-2xl text-xl" },
+          "Invoices"
+        ),
+        button(
+          {
+            className:
+              "px-4 py-2 rounded-md text-sm font-medium border-0 focus:outline-none focus:ring transition text-white bg-blue-500 hover:bg-blue-600 active:bg-blue-700 focus:ring-blue-300",
+            onclick: () => dispatch(showFormMsg(true)),
+          },
+          "+ Add invoice"
+        ),
+      ]),
+      div(
         {
-          className: "f3 pv2 ph3 bg-blue white bn",
-          onclick: () => dispatch(showFormMsg(true)),
+          className:
+            "relative bg-white rounded shadow-lg p-4 px-4 md:p-8 mb-6 container max-w-screen-lg mx-auto top-1/4",
         },
-        "Add invoice"
+        [invoiceTableView(dispatch, model.invoices)]
       ),
-    ]),
-    invoiceTableView(dispatch, model.invoices),
-    formView(dispatch, model),
-    pre(JSON.stringify(model, null, 2)),
-  ]);
+      formView(dispatch, model),
+      // pre(JSON.stringify(model, null, 2)),
+    ]
+  );
 }
 
 export default view;
