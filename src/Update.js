@@ -11,6 +11,8 @@ const MSGS = {
   DUE_DATE_INPUT: "DUE_DATE_INPUT",
   STATUS_INPUT: "STATUS_INPUT",
   SAVE_INVOICE: "SAVE_INVOICE",
+  EDIT_INVOICE_STATUS: "EDIT_INVOICE_STATUS",
+  SHOW_STATUS_FORM: "SHOW_STATUS_FORM",
   ADD_INVOICE_LINE: "ADD_INVOICE_LINE",
   LINE_NAME_INPUT: "LINE_NAME_INPUT",
   LINE_HOURS_INPUT: "LINE_HOURS_INPUT",
@@ -127,6 +129,30 @@ export function lineHourlyRateMsg(lineHourlyRate) {
   };
 }
 
+/**
+ * @param {Number} id
+ * @returns {Object}
+ */
+export function editStatusMsg(id, status) {
+  return {
+    type: MSGS.EDIT_INVOICE_STATUS,
+    id,
+    status,
+  };
+}
+
+/**
+ * @param {String} showStatusForm
+ * @returns {Object}
+ */
+export function showStatusFormMsg(id, showStatusForm) {
+  return {
+    type: MSGS.SHOW_STATUS_FORM,
+    id,
+    showStatusForm,
+  };
+}
+
 export const saveInvoiceMsg = { type: MSGS.SAVE_INVOICE };
 
 export const addInvoiceLine = { type: MSGS.ADD_INVOICE_LINE };
@@ -152,7 +178,7 @@ function update(msg, model) {
         billTo: "",
         description: "",
         dueDate: "",
-        created: dt.toLocaleString(),
+        created: dt.toISO(),
         status: "Open",
         lineName: "",
         lineHours: 0,
@@ -219,6 +245,36 @@ function update(msg, model) {
         ...model,
         invoiceLines,
         lineName: "",
+      };
+    }
+    case MSGS.EDIT_INVOICE_STATUS: {
+      const { id, status } = msg;
+
+      const invoices = R.map(
+        (invoice) =>
+          invoice.id === id
+            ? { ...invoice, status, showStatusForm: false }
+            : invoice,
+        model.invoices
+      );
+
+      return {
+        ...model,
+        invoices,
+      };
+    }
+    case MSGS.SHOW_STATUS_FORM: {
+      const { id, showStatusForm } = msg;
+
+      const invoices = R.map(
+        (invoice) =>
+          invoice.id === id ? { ...invoice, showStatusForm } : invoice,
+        model.invoices
+      );
+
+      return {
+        ...model,
+        invoices,
       };
     }
   }

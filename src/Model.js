@@ -8,7 +8,7 @@ const initModel = {
   created: "",
   status: "",
   showForm: false,
-  nextId: 0,
+  nextId: 2,
   editId: null,
   invoices: [
     {
@@ -17,8 +17,9 @@ const initModel = {
       email: "jane@doe.com",
       billTo: "Jane Doe Inc",
       description: "Did some cool stuff",
-      dueDate: "2021-12-29",
+      dueDate: "2022-12-29",
       status: "Open",
+      showStatusForm: false,
       invoiceLines: [
         {
           lineName: "Setup cool stuff",
@@ -39,9 +40,29 @@ const initModel = {
           lineAmount: 50,
         },
       ],
-      created: "05/10/2021",
+      created: "2021-10-05T12:10:35.895+02:00",
       linesAmountTotal: 300,
       linesHoursTotal: 12,
+    },
+    {
+      id: 1,
+      customerName: "Slack",
+      email: "slack",
+      billTo: "slack",
+      description: "Some description",
+      dueDate: "2021-10-04",
+      status: "Due",
+      invoiceLines: [
+        {
+          lineName: "A lot of work",
+          lineHours: 24,
+          lineHourlyRate: 90,
+          lineAmount: 2160,
+        },
+      ],
+      created: "2021-08-01T13:42:07.207+02:00",
+      linesAmountTotal: 2160,
+      linesHoursTotal: 24,
     },
   ],
   lineName: "",
