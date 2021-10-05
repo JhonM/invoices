@@ -35,6 +35,7 @@ const {
   th,
   td,
   select,
+  span,
 } = hh(h);
 
 const STATUS_UNITS = ["Open", "Close", "Due", "Paid"];
@@ -48,6 +49,44 @@ const STATUS_UNITS = ["Open", "Close", "Due", "Paid"];
 function cell(tag, className, value) {
   return tag({ className }, value);
 }
+
+/**
+ * @param {String} value
+ * @returns {Object} - VirtualNode object
+ * @description map value to right color type
+ */
+function labelOption(value) {
+  const types = {
+    Paid: "green",
+    Open: "blue",
+    Due: "red",
+    Close: "gray",
+  };
+  return span(
+    {
+      className: `focus:outline-none text-${types[value]}-600 text-sm py-2.5 px-5 rounded-md border border-${types[value]}-600 flex items-center justify-center inline-block m-2`,
+    },
+    value
+  );
+}
+
+const round = (places) =>
+  R.pipe(
+    (num) => num * Math.pow(10, places),
+    Math.round,
+    (num) => num * Math.pow(10, -1 * places)
+  );
+
+const formatMoney = R.curry((symbol, places, number) => {
+  return R.pipe(
+    R.defaultTo(0),
+    round(places),
+    (num) => num.toFixed(places),
+    R.concat(symbol)
+  )(number);
+});
+
+const toMoney = formatMoney("€", 2);
 
 const invoiceTableHeader = thead({ className: "block md:table-header-group" }, [
   tr([
@@ -115,7 +154,7 @@ function invoiceRow(dispatch, className, invoice) {
     cell(
       td,
       "p-2 md:border md:border-grey-500 text-left block md:table-cell",
-      invoice.linesAmountTotal
+      toMoney(invoice.linesAmountTotal)
     ),
     cell(
       td,
@@ -137,11 +176,9 @@ function invoiceRow(dispatch, className, invoice) {
       "p-2 md:border md:border-grey-500 text-left block md:table-cell",
       invoice.created
     ),
-    cell(
-      td,
-      "p-2 md:border md:border-grey-500 text-left block md:table-cell",
-      invoice.status
-    ),
+    cell(td, "p-2 md:border md:border-grey-500 text-left block md:table-cell", [
+      labelOption(invoice.status),
+    ]),
   ]);
 }
 
@@ -158,7 +195,11 @@ function invoiceTotalRow(invoices) {
   return tr({ className: "bt b" }, [
     cell(td, "p-2 text-left block md:table-cell", ""),
     cell(td, "p-2 text-left block md:table-cell", ""),
-    cell(td, "p-2 text-left block md:table-cell", linesAmountTotal),
+    cell(
+      td,
+      "p-2 text-left block md:table-cell bold",
+      toMoney(linesAmountTotal)
+    ),
   ]);
 }
 
@@ -258,7 +299,7 @@ function invoiceLinesRow(dispatch, className, line) {
     cell(
       td,
       "p-2 md:border md:border-grey-500 text-left block md:table-cell",
-      line.lineAmount
+      toMoney(line.lineAmount)
     ),
   ]);
 }
@@ -295,7 +336,7 @@ function invoiceLinesTotalRow(lines) {
       cell(
         td,
         "p-2 md:border md:border-grey-500 text-left block md:table-cell",
-        linesAmountTotal
+        toMoney(linesAmountTotal)
       ),
     ]
   );
@@ -353,7 +394,7 @@ function statusUnitOptions(selectedUnit) {
  * @returns {Object} - VirtualNode object
  */
 function buttonSet(dispatch) {
-  return div({ className: "flex justify-end" }, [
+  return div({ className: "flex justify-center" }, [
     button(
       {
         className:
@@ -439,7 +480,7 @@ function formView(dispatch, model) {
       form(
         {
           className:
-            "relative bg-white rounded shadow-lg p-4 px-4 md:p-8 mb-6 container max-w-screen-lg mx-auto top-40",
+            "relative bg-white rounded shadow-lg p-4 px-4 md:p-8 mb-6 container max-w-screen-lg mx-auto top-24",
           onsubmit: (e) => {
             e.preventDefault();
             dispatch(saveInvoiceMsg);
